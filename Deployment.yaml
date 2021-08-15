@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-settings
+  namespace: kubernetes-cluster-bhavinibatra-prac
+  labels:
+    app: dotnet-app-master-prac
+data:
+  API_URL: "http://google.com"
+  ENVIRONMENT: "DEV"
+  LANGUAGE: "ENGLISH"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dotnet-app-deployment-master-prac
+  namespace: kubernetes-cluster-bhavinibatra-prac
+  labels:
+    app: dotnet-app-master-prac
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: dotnet-app-master-prac
+  template:
+    metadata:
+      labels:
+        app: dotnet-app-master-prac
+    spec:
+      containers:
+        - name: dotnet-app-master-prac
+          image: bhavinibatra/pracmaster:latest
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          envFrom:
+          - configMapRef:
+              name: app-settings
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dotnet-app-master-prac
+  namespace: kubernetes-cluster-bhavinibatra-prac
+spec:
+  type: LoadBalancer
+  selector:
+    app: dotnet-app-master-prac
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
